@@ -1,0 +1,578 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Student Dashboard — home.html</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+
+<style>
+  /* UPDATED COLOR SCHEME */
+  :root{
+    --sidebar-bg: #1c3664; /* DIT Dark Blue */
+    --sidebar-contrast: rgba(255,255,255,0.08);
+    --primary: #007bff; /* Primary Bright Blue */
+    --accent: #0056b3; /* Darker Primary Blue (used for icons/gradients) */
+    --muted: #6b7280;
+    --card-bg: #ffffff;
+    --panel-bg: #f4f7f6; /* Matching the light background of the previous design */
+    --glass: rgba(255,255,255,0.12);
+    --success: #28a745; /* Standard Green */
+    --danger: #dc3545; /* Standard Red (matches previous red accent) */
+    --text: #0f1724;
+  }
+
+  /* Reset & base */
+  * { box-sizing: border-box; }
+  html,body { 
+    height:100%; 
+    margin:0; 
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; 
+    color:var(--text); 
+    background: var(--panel-bg); /* Use solid color to match previous subtle background */
+    -webkit-font-smoothing:antialiased; 
+    -moz-osx-font-smoothing:grayscale; 
+  }
+  a { color:inherit; text-decoration:none; }
+
+  /* App grid */
+  .app {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    grid-template-rows: 72px 1fr;
+    min-height:100vh;
+  }
+
+  /* Topbar - UPDATED GRADIENT */
+  header.topbar {
+    grid-column: 1 / -1;
+    background: linear-gradient(90deg,var(--sidebar-bg), #284478); /* Dark Blue Gradient */
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 18px;
+    color:#fff;
+    box-shadow: 0 6px 18px rgba(11,37,45,0.16);
+    position:sticky;
+    top:0;
+    z-index:40;
+  }
+  .top-left { display:flex; align-items:center; gap:12px; }
+  .hamburger {
+    width:44px; height:44px; border-radius:8px; display:flex; align-items:center; justify-content:center; cursor:pointer;
+    background: rgba(255,255,255,0.06);
+    transition: all .18s;
+  }
+  .hamburger:hover { transform:translateY(-2px); background: rgba(255,255,255,0.09); }
+  .brand {
+    display:flex; align-items:center; gap:10px; margin-left:6px;
+  }
+  .brand .logo {
+    width:48px; height:36px; border-radius:6px; background:#fff; color:var(--sidebar-bg); /* Use DIT Dark Blue */
+    display:flex; align-items:center; justify-content:center; font-weight:800; font-family: "Playfair Display", serif;
+    box-shadow:0 2px 8px rgba(2,6,23,0.12);
+  }
+  .brand .title { font-weight:700; font-size:18px; letter-spacing:0.2px; }
+  .welcome { margin-left:14px; font-weight:600; color:rgba(255,255,255,0.92); font-size:14px; }
+  .welcome .email { color:#ffd24a; font-weight:800; }
+
+  .top-actions { display:flex; align-items:center; gap:8px; }
+  .top-actions .action {
+    background:rgba(255,255,255,0.06); color:#fff; border: none; padding:8px 10px; border-radius:8px; cursor:pointer; font-weight:700;
+  }
+  .logout { background: var(--danger); padding:8px 12px; border-radius:8px; color:#fff; border:none; cursor:pointer; font-weight:700; } /* Use danger color for logout */
+
+  /* Sidebar - UPDATED GRADIENT */
+  nav.sidebar {
+    background: linear-gradient(180deg,var(--sidebar-bg), #1a335c); /* Dark Blue Gradient */
+    padding:18px;
+    color:#fff;
+    overflow:auto;
+    border-right:1px solid rgba(255,255,255,0.02);
+  }
+  .search { margin-bottom:12px; }
+  .search input {
+    width:100%; padding:10px 12px; border-radius:10px; border:none; outline:none;
+    background: rgba(255,255,255,0.06); color:#fff; font-weight:600;
+  }
+  .menu { margin-top:6px; display:flex; flex-direction:column; gap:8px; }
+  .menu .item {
+    display:flex; gap:12px; align-items:center; padding:11px 12px; border-radius:8px; cursor:pointer;
+    transition:all .14s; font-weight:700; color:#fff; font-size:14px;
+  }
+  .menu .item:hover { transform:translateX(6px); background: var(--sidebar-contrast); }
+  .menu .item.active { background: var(--primary); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02); } /* Use Primary Blue for active item */
+  .menu .item svg { opacity:0.95; }
+
+  /* Content */
+  main.content {
+    padding:20px;
+    overflow:auto;
+  }
+
+  .page-header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; }
+  .page-title { font-family:"Playfair Display", serif; font-size:20px; color:var(--text); font-weight:700; letter-spacing:0.6px; }
+  .breadcrumb { color:var(--muted); font-weight:600; font-size:13px; }
+
+  .grid {
+    display:grid;
+    grid-template-columns: 1fr 360px;
+    gap:18px;
+  }
+
+  /* Left column */
+  .left-col { display:flex; flex-direction:column; gap:16px; }
+
+  .metrics {
+    display:grid;
+    grid-template-columns: repeat(2,1fr);
+    gap:12px;
+  }
+  .card {
+    background:var(--card-bg); padding:14px; border-radius:12px;
+    box-shadow: 0 6px 18px rgba(18,38,45,0.06);
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+  }
+  .metric .meta { display:flex; flex-direction:column; gap:6px; }
+  .metric .label { color:var(--muted); font-weight:700; font-size:13px; }
+  .metric .value { font-weight:800; font-size:20px; color:var(--primary); } /* Use Primary Blue */
+
+  /* Icon Wrap - UPDATED COLOR */
+  .metric .iconWrap {
+    width:58px; height:58px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+    background: linear-gradient(180deg, rgba(0,86,179,0.1), rgba(0,86,179,0.05)); /* Uses new accent color */
+    border:1px solid rgba(0,86,179,0.08); /* Uses new accent color */
+  }
+
+  /* Timetable and notice panels */
+  .panel {
+    background:var(--card-bg); padding:14px; border-radius:12px; box-shadow: 0 6px 18px rgba(18,38,45,0.06);
+  }
+  .panel h3 { margin:0 0 10px 0; font-size:15px; color:var(--primary); } /* Use Primary Blue */
+
+  .timetable { min-height:86px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:var(--muted); background: linear-gradient(180deg,#fbfeff,#f8fcfd); font-weight:700; }
+
+  .tabs { margin-top:8px; }
+  .tab-buttons { display:flex; gap:10px; }
+  .tab-buttons button {
+    padding:8px 12px; border-radius:8px; border:none; cursor:pointer; background:transparent; font-weight:700; color:var(--primary); /* Use Primary Blue */
+  }
+  .tab-content { margin-top:12px; color:var(--muted); min-height:60px; }
+
+  /* Right column */
+  .right-col { display:flex; flex-direction:column; gap:16px; }
+
+  .profile {
+    display:flex; gap:12px; align-items:flex-start; padding:14px; border-radius:12px; background: linear-gradient(180deg,#fff,#fcfeff);
+    box-shadow: 0 8px 20px rgba(18,38,45,0.06);
+  }
+  .profile img { width:82px; height:82px; border-radius:14px; object-fit:cover; border:4px solid var(--panel-bg); }
+  .profile .meta { flex:1; }
+  .profile h4 { margin:0; color:var(--text); font-size:16px; font-weight:800; }
+  .profile p { margin:6px 0 0 0; color:var(--muted); font-size:13px; }
+  .profile .badges { margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; }
+  .badge { background:#fbfdff; padding:6px 8px; border-radius:8px; border:1px solid #f1f6f7; font-weight:700; color:var(--muted); font-size:12px; }
+
+  .view-btn { background:transparent; border:1px solid rgba(2,6,23,0.06); padding:8px 10px; border-radius:8px; cursor:pointer; font-weight:700; color:var(--primary); } /* Use Primary Blue */
+
+  /* Attendance list */
+  .attendance {
+    padding:12px; border-radius:12px; background:var(--card-bg); box-shadow: 0 8px 20px rgba(18,38,45,0.06);
+  }
+  .attendance h3 { margin:0 0 10px 0; font-size:15px; color:var(--primary); } /* Use Primary Blue */
+  .att-item { display:flex; align-items:center; justify-content:space-between; padding:10px 6px; border-radius:8px; transition:all .12s; }
+  .att-item + .att-item { margin-top:8px; }
+  .att-item:hover { background: #fbfeff; transform:translateY(-3px); box-shadow: 0 8px 16px rgba(8,20,25,0.03); }
+  .course { display:flex; gap:12px; align-items:center; }
+  .code { color:var(--primary); font-weight:800; width:72px; } /* Use Primary Blue */
+  .title { font-weight:800; font-size:14px; color:var(--text); }
+  .teacher { font-size:12px; color:var(--muted); margin-top:6px; }
+
+  /* Animated circular progress using SVG */
+  .progressSvg { width:50px; height:50px; display:block; }
+  /* Progress Text - Use Success Color */
+  .progressText { font-weight:600; font-size:9px; color:var(--success); } 
+
+  /* small screens */
+  @media (max-width:1000px) {
+    .app { grid-template-columns: 84px 1fr; }
+    nav.sidebar { padding:14px; }
+    .menu .item span.label { display:none; }
+    .brand .title { font-size:14px; display:none; }
+  }
+  @media (max-width:720px) {
+    .app { grid-template-columns: 1fr; grid-template-rows: 72px auto 1fr; }
+    nav.sidebar { grid-row:3; order:3; display:flex; overflow:auto; flex-direction:row; gap:8px; padding:12px; }
+    nav.sidebar .menu { flex-direction:row; }
+    main.content { grid-row:2; }
+    .grid { grid-template-columns: 1fr; }
+    .profile img { width:64px; height:64px; border-radius:12px; }
+    .right-col { order:2; }
+  }
+
+  /* subtle utilities */
+  .muted { color:var(--muted); }
+  .small { font-size:12px; color:var(--muted); }
+  .btn-ghost { background:transparent; border:1px solid rgba(11,37,45,0.06); padding:8px 10px; border-radius:8px; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <header class="topbar">
+    <div class="top-left">
+      <div class="hamburger" id="hamb" title="Toggle menu" aria-label="Toggle menu">
+        <svg width="20" height="14" viewBox="0 0 20 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect y="0" width="20" height="2" rx="1" fill="#fff"/>
+          <rect y="6" width="20" height="2" rx="1" fill="#fff"/>
+          <rect y="12" width="20" height="2" rx="1" fill="#fff"/>
+        </svg>
+      </div>
+
+      <div class="brand" aria-hidden="true">
+        <div class="logo">DIT</div>
+        <div>
+          <div class="title">iNxt</div>
+          <div class="small" style="color:rgba(255,255,255,0.85)">Student Portal</div>
+        </div>
+      </div>
+
+      <div class="welcome small">Welcome <span class="email">1000029398@dit.edu.in</span> &nbsp; <span class="small" style="color:#fff; opacity:0.9">Harshit Lamba</span></div>
+    </div>
+
+    <div class="top-actions">
+      <button class="action" title="Decrease font">−</button>
+      <button class="action" title="Increase font">+</button>
+      <button class="action" title="Reset layout">Reset</button>
+      <button class="logout" id="logoutBtn">Logout</button>
+    </div>
+  </header>
+
+  <nav class="sidebar" id="sidebar" aria-label="Main navigation">
+    <div class="search">
+      <input id="menuSearch" placeholder="Search menu here..." aria-label="Search menu" />
+    </div>
+
+    <div class="menu" id="menuList" role="navigation" aria-label="Sidebar menu">
+      <div class="item active" data-name="Academics">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2L3 7l9 5 9-5-9-5z" fill="#fff" opacity="0.95"/><path d="M3 17v-6l9 5 9-5v6l-9 5-9-5z" fill="#fff" opacity="0.12"/></svg>
+        <span class="label">Academics</span>
+      </div>
+
+      <div class="item" data-name="Examination">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" fill="#fff" opacity="0.95"/></svg>
+        <span class="label">Examination</span>
+      </div>
+
+      <div class="item" data-name="Back Paper - Registration">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="#fff" opacity="0.95"/></svg>
+        <span class="label">Back Paper - Registration</span>
+      </div>
+
+      <div class="item" data-name="Industrial Training"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M3 13h18v8H3z" fill="#fff" opacity="0.9"/></svg><span class="label">Industrial Training</span></div>
+
+      <div class="item" data-name="Grievance"><svg width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#fff" opacity="0.9"/></svg><span class="label">Grievance</span></div>
+
+      <div class="item" data-name="Academic Document"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M7 2h10v4H7z" fill="#fff" opacity="0.95"/></svg><span class="label">Academic Document</span></div>
+
+      <div class="item" data-name="Specialization and Minor"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16 5.5 20 7.5 13 2 9h7z" fill="#fff" opacity="0.9"/></svg><span class="label">Specialization and Minor</span></div>
+
+      <div class="item" data-name="Graduation"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M12 3L1 9l11 6 9-5.09V17h2V9z" fill="#fff" opacity="0.9"/></svg><span class="label">Graduation</span></div>
+
+      <div class="item" data-name="Transport"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M3 13h18v6H3z" fill="#fff" opacity="0.9"/></svg><span class="label">Transport</span></div>
+
+      <div class="item" data-name="Hostel"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M3 3h18v6H3z" fill="#fff" opacity="0.9"/></svg><span class="label">Hostel</span></div>
+
+      <div class="item" data-name="Resources"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M12 2l7 12H5z" fill="#fff" opacity="0.9"/></svg><span class="label">Resources</span></div>
+
+      <div class="item" data-name="My Profile"><svg width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3" fill="#fff" opacity="0.95"/><path d="M6 20a6 6 0 0 1 12 0" fill="#fff" opacity="0.09"/></svg><span class="label">My Profile</span></div>
+
+      <div class="item" data-name="Fees"><svg width="18" height="18" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" fill="#fff" opacity="0.9"/></svg><span class="label">Fees</span></div>
+
+      <div class="item" data-name="Mentor & Mentee"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M6 3h12v6H6z" fill="#fff" opacity="0.9"/></svg><span class="label">Mentor & Mentee</span></div>
+
+      <div class="item" data-name="Indiscipline Process"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M12 2l3 7h7v2H2V9h7z" fill="#fff" opacity="0.9"/></svg><span class="label">Indiscipline Process</span></div>
+
+    </div>
+  </nav>
+
+  <main class="content" role="main">
+    <div class="page-header">
+      <div>
+        <div class="page-title">STUDENT DASHBOARD</div>
+        <div class="breadcrumb small muted">Dashboard / Home</div>
+      </div>
+
+      <div class="small muted">Last login: <strong>2 hours ago</strong></div>
+    </div>
+
+    <div class="grid">
+      <section class="left-col">
+
+        <div class="metrics">
+          <div class="card metric">
+            <div class="meta">
+              <div class="label">Current</div>
+              <div class="value">Outstanding Balance</div>
+              <div class="small muted">NOT AVAILABLE</div>
+            </div>
+            <div class="iconWrap" aria-hidden="true">
+              <svg width="28" height="28" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2" fill="var(--accent)"/><circle cx="12" cy="12" r="3" fill="#fff"/></svg>
+            </div>
+          </div>
+
+          <div class="card metric">
+            <div class="meta">
+              <div class="label">Next</div>
+              <div class="value">Due Fees</div>
+              <div class="small muted">Semester/Trimester</div>
+            </div>
+            <div class="iconWrap" title="Click To View">
+              <svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 2l9 4v6c0 5-3 9-9 10-6-1-9-5-9-10V6l9-4z" fill="var(--accent)"/></svg>
+            </div>
+          </div>
+
+          <div class="card metric">
+            <div class="meta">
+              <div class="label">Total</div>
+              <div class="value">Credits Earned</div>
+              <div class="small muted">0</div>
+            </div>
+            <div class="iconWrap">
+              <svg width="24" height="24" viewBox="0 0 24 24"><path d="M3 12h18v8H3z" fill="var(--accent)"/></svg>
+            </div>
+          </div>
+
+          <div class="card metric">
+            <div class="meta">
+              <div class="label">Total</div>
+              <div class="value">Credits Pending</div>
+              <div class="small muted">161</div>
+            </div>
+            <div class="iconWrap">
+              <svg width="24" height="24" viewBox="0 0 24 24"><path d="M4 4h16v4H4z" fill="var(--accent)"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Today's Timetable</h3>
+          <div class="timetable">Today is a Holiday</div>
+        </div>
+
+        <div class="panel tabs" aria-live="polite">
+          <div class="tab-buttons">
+            <button id="tabNotice" class="btn-ghost">Notice</button>
+            <button id="tabExam" class="btn-ghost">Exam Notice</button>
+          </div>
+          <div class="tab-content" id="tabContent">Coming Soon...</div>
+        </div>
+
+      </section>
+
+      <aside class="right-col">
+
+        <div class="profile">
+          <img src="./DITN2518469_PHOTO_9a3fff34-46c2-4798-a9fd-548ccbd94b5e.jpg" alt="Profile photo" />
+          <div class="meta">
+            <h4>Harshit Lamba</h4>
+            <p class="small muted">+91 6396767603 • 1000029338@dit.edu.in</p>
+            <p class="small" style="margin-top:8px;">Bachelor of Technology in Civil Engineering</p>
+            <div class="badges">
+              <div class="badge">ERP ID - 1000029338</div>
+              <div class="badge">Roll No - 25B01D0580</div>
+              <div class="badge">Intake year - 2025</div>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:10px; align-items:flex-end;">
+            <button class="view-btn" onclick="window.location.href='https://harshit030308.github.io/Personal-Details/'">View details</button>
+            <div class="small muted">Mentor - Not Yet Assigned</div>
+          </div>
+        </div>
+
+        <div class="attendance">
+          <h3>My Attendance</h3>
+
+          <div class="att-item" role="listitem">
+            <div class="course">
+              <div class="code">CSN101</div>
+              <div>
+                <div class="title">Programming for Problem Solving</div>
+                <div class="teacher small muted">Vasu Bhatia</div>
+              </div>
+            </div>
+
+            <svg class="progressSvg" viewBox="0 0 36 36" role="img" aria-label="84.1% attendance">
+              <defs>
+                <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="var(--success)"/>
+                  <stop offset="100%" stop-color="var(--success)"/>
+                </linearGradient>
+              </defs>
+              <path d="M18 2a16 16 0 1 1 0 32a16 16 0 1 1 0-32" fill="none" stroke="#f1f3f4" stroke-width="4"></path>
+              <path id="p1" d="M18 2a16 16 0 1 1 0 32a16 16 0 1 1 0-32" fill="none" stroke="url(#g1)" stroke-width="4" stroke-dasharray="84.1 100" stroke-linecap="round" transform="rotate(-90 18 18)"></path>
+              <text x="18" y="20.6" text-anchor="middle" class="progressText" style="color:var(--success)">84.1%</text>
+            </svg>
+          </div>
+
+          <div class="att-item">
+            <div class="course">
+              <div class="code">ENGN101</div>
+              <div>
+                <div class="title">Professional Communication</div>
+                <div class="teacher small muted">Mohd Siddiqui Khan</div>
+              </div>
+            </div>
+            <svg class="progressSvg" viewBox="0 0 36 36" role="img" aria-label="75% attendance">
+              <path d="M18 2a16 16 0 1 1 0 32a16 16 0 1 1 0-32" fill="none" stroke="#f1f3f4" stroke-width="4"></path>
+              <path d="M18 2a16 16 0 1 1 0 32a16 16 0 1 1 0-32" fill="none" stroke="var(--success)" stroke-width="4" stroke-dasharray="75 100" stroke-linecap="round" transform="rotate(-90 18 18)"></path>
+              <text x="18" y="20.6" text-anchor="middle" class="progressText" style="color:var(--success)">75%</text>
+            </svg>
+          </div>
+
+          <div class="att-item">
+            <div class="course">
+              <div class="code">MAN101</div>
+              <div>
+                <div class="title">Engineering Mathematics I</div>
+                <div class="teacher small muted">Fateh Singh</div>
+              </div>
+            </div>
+            <svg class="progressSvg" viewBox="0 0 36 36" role="img" aria-label="80% attendance">
+              <path d="M18 2a16 16 0 1 1 0 32a16 16 0 1 1 0-32" fill="none" stroke="#f1f3f4" stroke-width="4"></path>
+              <path d="M18 2a16 16 0 1 1 0 32a16 16 0 1 1 0-32" fill="none" stroke="var(--success)" stroke-width="4" stroke-dasharray="80 100" stroke-linecap="round" transform="rotate(-90 18 18)"></path>
+             <text x="18" y="20.6" text-anchor="middle" class="progressText" style="color:var(--success)">80%</text>
+            </svg>
+          </div>
+
+          <div class="att-item">
+            <div class="course">
+              <div class="code">MEN101</div>
+              <div>
+                <div class="title">Engineering Graphics</div>
+                <div class="teacher small muted">Anil Kumar Patil</div>
+              </div>
+            </div>
+            <svg class="progressSvg" viewBox="0 0 36 36" role="img" aria-label="79% attendance">
+              <path d="M18 2a16 16 0 1 1 0 32a16 16 0 1 1 0-32" fill="none" stroke="#f1f3f4" stroke-width="4"></path>
+              <path d="M18 2a16 16 0 1 1 0 32a16 16 0 1 1 0-32" fill="none" stroke="var(--success)" stroke-width="4" stroke-dasharray="79 100" stroke-linecap="round" transform="rotate(-90 18 18)"></path>
+              <text x="18" y="20.6" text-anchor="middle" class="progressText" style="color:var(--success)">79%</text>
+            </svg>
+          </div>
+
+          <div class="att-item">
+            <div class="course">
+              <div class="code">MEN102</div>
+              <div>
+                <div class="title">Engineering Physics</div>
+                <div class="teacher small muted">Soni Sharma</div>
+              </div>
+            </div>
+            <svg class="progressSvg" viewBox="0 0 36 36" role="img" aria-label="79% attendance">
+              <path d="M18 2a16 16 0 1 1 0 32a16 16 0 1 1 0-32" fill="none" stroke="#f1f3f4" stroke-width="4"></path>
+              <path d="M18 2a16 16 0 1 1 0 32a16 16 0 1 1 0-32" fill="none" stroke="var(--success)" stroke-width="4" stroke-dasharray="79 100" stroke-linecap="round" transform="rotate(-90 18 18)"></path>
+              <text x="18" y="20.6" text-anchor="middle" class="progressText" style="color:var(--success)">79%</text>
+            </svg>
+          </div>
+
+        </div>
+      </aside>
+    </div>
+  </main>
+
+</div>
+
+<script>
+  // Tab logic
+  document.getElementById('tabNotice').addEventListener('click', function(){
+    document.getElementById('tabContent').textContent = "No new notices.";
+  });
+  document.getElementById('tabExam').addEventListener('click', function(){
+    document.getElementById('tabContent').textContent = "No exam notices currently.";
+  });
+
+  // Sidebar search filter
+  const menuSearch = document.getElementById('menuSearch');
+  const menuItems = Array.from(document.querySelectorAll('#menuList .item'));
+  menuSearch.addEventListener('input', function(){
+    const q = this.value.trim().toLowerCase();
+    menuItems.forEach(it=>{
+      const name = it.getAttribute('data-name') || it.textContent;
+      it.style.display = name.toLowerCase().includes(q) ? '' : 'none';
+    });
+  });
+
+  // Simple hamburger toggle (collapses sidebar)
+  const hamb = document.getElementById('hamb');
+  const sidebar = document.getElementById('sidebar');
+  hamb.addEventListener('click', function(){
+    if (window.innerWidth <= 720) {
+      // mobile: toggle visibility
+      if (sidebar.style.display === 'flex') sidebar.style.display = 'none';
+      else sidebar.style.display = 'flex';
+      return;
+    }
+    if(sidebar.style.width === '84px') {
+      sidebar.style.width = '';
+      sidebar.querySelectorAll('.label').forEach(s=>s.style.display='');
+      menuItems.forEach(i=>i.style.justifyContent='flex-start');
+    } else {
+      sidebar.style.width = '84px';
+      sidebar.querySelectorAll('.label').forEach(s=>s.style.display='none');
+      menuItems.forEach(i=>i.style.justifyContent='center');
+    }
+  });
+
+  // Menu item activation
+  menuItems.forEach(it=>{
+    it.addEventListener('click', function(){
+      const name = this.getAttribute('data-name');
+      if (name === 'Academics') {
+        window.location.href = 'https://ditnexushomepage.netlify.app';
+        return;
+      }
+      // Added functionality to open in new tab if Examination is clicked
+      if (name === 'Examination') {
+        window.location.href = 'https://harshit030308.github.io/Examination-Result/';
+        return;
+      }
+      if (name === 'My Profile') {
+        window.location.href = 'https://harshit030308.github.io/Personal-Details/';
+        return;
+      }
+      if(name == 'Hostel'){
+        window.location.href = 'https://harshit030308.github.io/HostelDetails/';
+        return;
+      }
+      menuItems.forEach(x=>x.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+
+  // Logout demo
+  document.getElementById('logoutBtn').addEventListener('click', function(){
+    if(confirm('Do you want to logout?')) {
+      window.location.href = 'https://ditnexuslogin.netlify.app';
+    }
+  });
+
+  // Make SVG progress animate by adjusting stroke-dasharray on load
+  window.addEventListener('load', function(){
+    // all <path> elements inside svg with stroke-dasharray attribute
+    const svgs = document.querySelectorAll('.progressSvg');
+    svgs.forEach(svg=>{
+      const path = svg.querySelectorAll('path')[1];
+      const dash = path.getAttribute('stroke-dasharray') || '';
+      // create smooth animation using inline style
+      path.style.transition = 'stroke-dasharray 900ms cubic-bezier(.2,.9,.2,1)';
+      // re-trigger (no real change required because dash is already set inline)
+      setTimeout(()=> path.style.opacity = 1, 70);
+    });
+  });
+</script>
+
+</body>
+</html>
